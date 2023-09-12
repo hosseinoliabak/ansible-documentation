@@ -97,7 +97,7 @@ To enable NETCONF on a new switch through Ansible, use the ``junipernetworks.jun
 
 Once NETCONF is enabled, change your variables to use the NETCONF connection.
 
-Example NETCONF inventory ``[junos:vars]``
+Example NETCONF inventory over a bastion host ``[junos:vars]``
 ------------------------------------------
 
 .. code-block:: yaml
@@ -105,10 +105,21 @@ Example NETCONF inventory ``[junos:vars]``
    [junos:vars]
    ansible_connection=ansible.netcommon.netconf
    ansible_network_os=junipernetworks.junos.junos
-   ansible_user=myuser
-   ansible_password=!vault |
-   ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q bastion01"'
+   ansible_netconf_ssh_config: "~/ansible/group_vars/ssh_config"
 
+~/ansible/group_vars/ssh_config example
+.. code-block:: yaml
+
+   Host bastion
+     HostName bastion.example.com
+     User myuser
+     IdentityFile "~/.ssh/id_rsa"
+     Port 22
+   Host *.example.com
+     HostName %h
+     User myuser
+     ProxyCommand ssh -W %h:%p bastion
+     StrictHostKeyChecking no
 
 Example NETCONF task
 --------------------
